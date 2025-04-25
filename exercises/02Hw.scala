@@ -31,6 +31,23 @@ object Hw02Task1 {
   val countVisitor = Visitor[Int](_ => 1, _ + _)
   val printVisitor = Visitor[String](_.toString, "(" + _ + "+" + _ + ")")
 
+ // pattern matching
+  def count(e: Exp): Int = e match {
+    case Num(_)      => 1
+    case Add(l, r)   => count(l) + count(r)
+  }
+
+  def printExp(e: Exp): String = e match {
+    case Num(n)      => n.toString
+    case Add(l, r)   => "(" + printExp(l) + "+" + printExp(r) + ")"
+  }
+
+ 
+  val testExpr = Add(Num(1), Add(Num(2), Num(3)))
+
+  assert(count(testExpr) == 3)
+  assert(printExp(testExpr) == "(1+(2+3))")
+}
   /** Subtasks:
     *
     * 1) Translate `countVisitor` and `printVisitor` to a definition using

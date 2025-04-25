@@ -56,11 +56,23 @@ object Hw02Task2 {
     case Or(lhs: Exp, rhs: Exp)
     case Not(e: Exp)
     case Impl(lhs: Exp, rhs: Exp)
+    case Nand(lhs: Exp, rhs: Exp)
   import Exp._
 
-  def eval(e: Exp): Boolean = e match {
-    case True()  => true
-    case False() => false
+ def desugar (e: Exp): Exp = e match {
+  case True()       => True()
+  case False()      => False()
+  case Nand(a, b)   => Nand(desugar(a), desugar(b))
+  case Not(a)       => Nand(desugar(a), desugar(a))
+  case And(a, b)    => Nand(Nand(desugar(a), desugar(b)), Nand(desugar(a), desugar(b)))
+  case Or(a, b)     => Nand(Nand(desugar(a), desugar(a)), Nand(desugar(b), desugar(b)))
+  case Impl(a, b)   => desugar(Or(Not(desugar(a)), desugar(b))) //a -> b = Not a or b
+ }
+
+  def eval(e: Exp): Boolean = desugar(e) match {
+    case True()     => true
+    case False()    => false
+    case Nand(l, r) => !(eval(l) && eval(r))
     case _       => sys.error("not yet implemented")
   }
 
